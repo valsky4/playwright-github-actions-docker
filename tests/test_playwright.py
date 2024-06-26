@@ -13,4 +13,4 @@ def test_get_started_link(page: Page):
     playwright_page = PlaywrightPage(page)
     playwright_page.navigate()
     playwright_page.click_button(role='link', name='Get started')
-    playwright_page.assert_page_role_to_be_visible(role='heading', name='Installation')
+    playwright_page.assert_page_role_to_be_visible(role='heading', name='Installatio32n')
