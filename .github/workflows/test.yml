@@ -37,7 +37,7 @@ jobs:
     - name: Run Playwright tests in Chromium
       run: |
         mkdir -p test-reports
-        pytest --browser=chromium --junitxml=test-reports/results_chromium.xml
+        pytest --browser=chromium --headless --junitxml=test-reports/results_chromium.xml
 
     - name: Upload test report for Chromium
       uses: actions/upload-artifact@v2
@@ -72,7 +72,7 @@ jobs:
     - name: Run Playwright tests in ${{ matrix.browser }}
       run: |
         mkdir -p test-reports
-        pytest --browser=${{ matrix.browser }} --junitxml=test-reports/results_${{ matrix.browser }}.xml
+        pytest --browser=${{ matrix.browser }} --headless --junitxml=test-reports/results_${{ matrix.browser }}.xml
 
     - name: Upload test report for ${{ matrix.browser }}
       uses: actions/upload-artifact@v2
