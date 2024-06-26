@@ -19,31 +19,31 @@ jobs:
     name: Run tests in single browser (Chromium)
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.12'
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install pytest-playwright
-        playwright install
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest-playwright
+          playwright install
 
-    - name: Run Playwright tests in Chromium
-      run: |
-        mkdir -p test-reports
-        pytest --browser=chromium --headless --junitxml=test-reports/results_chromium.xml
+      - name: Run Playwright tests in Chromium
+        run: |
+          mkdir -p test-reports
+          pytest --browser=chromium --junitxml=test-reports/results_chromium.xml
 
-    - name: Upload test report for Chromium
-      uses: actions/upload-artifact@v4
-      with:
-        name: test-report-chromium
-        path: test-reports/results_chromium.xml
+      - name: Upload test report for Chromium
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report-chromium
+          path: test-reports/results_chromium.xml
 
   multiple-browsers:
     if: github.event.inputs.run_type == 'multiple'
@@ -51,38 +51,38 @@ jobs:
     name: Run tests in multiple browsers (Chromium, WebKit, and Firefox)
     strategy:
       matrix:
-        browser: [chromium, webkit, firefox]
+        browser: [ chromium, webkit, firefox ]
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.12'
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install pytest-playwright
-        playwright install
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest-playwright
+          playwright install
 
-    - name: Run Playwright tests in ${{ matrix.browser }}
-      run: |
-        mkdir -p test-reports
-        pytest --browser=${{ matrix.browser }} --headless --junitxml=test-reports/results_${{ matrix.browser }}.xml
+      - name: Run Playwright tests in ${{ matrix.browser }}
+        run: |
+          mkdir -p test-reports
+          pytest --browser=${{ matrix.browser }} --junitxml=test-reports/results_${{ matrix.browser }}.xml
 
-    - name: Upload test report for ${{ matrix.browser }}
-      uses: actions/upload-artifact@v4
-      with:
-        name: test-report-${{ matrix.browser }}
-        path: test-reports/results_${{ matrix.browser }}.xml
+      - name: Upload test report for ${{ matrix.browser }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report-${{ matrix.browser }}
+          path: test-reports/results_${{ matrix.browser }}.xml
 
-    - name: Upload Playwright traces
-      if: ${{ !cancelled() }}
-      uses: actions/upload-artifact@v4
-      with:
-        name: playwright-traces
-        path: test-reports/
+      - name: Upload Playwright traces
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces
+          path: test-reports/
