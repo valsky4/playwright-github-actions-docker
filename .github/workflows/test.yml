@@ -1,3 +1,4 @@
+name: Playwright Tests
 on:
   workflow_dispatch:
     inputs:
@@ -56,7 +57,7 @@ jobs:
     name: Run tests in multiple browsers (Chromium, WebKit, and Firefox)
     strategy:
       matrix:
-        browser: [chromium, webkit, firefox]
+        browser: [ chromium, webkit, firefox ]
 
     steps:
       - name: Checkout code
