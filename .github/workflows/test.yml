@@ -36,14 +36,21 @@ jobs:
 
     - name: Run Playwright tests in Chromium
       run: |
-        mkdir -p test-reports
-        pytest --browser=chromium --junitxml=test-reports/results_chromium.xml
+        mkdir -p test-results
+        pytest --browser=chromium --headless --junitxml=test-results/results_chromium.xml --tracing=on
 
     - name: Upload test report for Chromium
       uses: actions/upload-artifact@v2
       with:
         name: test-report-chromium
-        path: test-reports/results_chromium.xml
+        path: test-results/results_chromium.xml
+
+    - name: Upload Playwright traces
+      if: ${{ !cancelled() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: playwright-traces
+        path: test-results/
 
   multiple-browsers:
     if: github.event.inputs.run_type == 'multiple'
@@ -71,11 +78,18 @@ jobs:
 
     - name: Run Playwright tests in ${{ matrix.browser }}
       run: |
-        mkdir -p test-reports
-        pytest --browser=${{ matrix.browser }} --junitxml=test-reports/results_${{ matrix.browser }}.xml
+        mkdir -p test-results
+        pytest --browser=${{ matrix.browser }} --headless --junitxml=test-results/results_${{ matrix.browser }}.xml --tracing=on
 
     - name: Upload test report for ${{ matrix.browser }}
       uses: actions/upload-artifact@v2
       with:
         name: test-report-${{ matrix.browser }}
-        path: test-reports/results_${{ matrix.browser }}.xml
+        path: test-results/results_${{ matrix.browser }}.xml
+
+    - name: Upload Playwright traces
+      if: ${{ !cancelled() }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: playwright-traces
+        path: test-results/
