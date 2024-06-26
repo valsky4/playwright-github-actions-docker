@@ -38,6 +38,12 @@ jobs:
         run: |
           mkdir -p test-reports
           pytest --browser=chromium --html=test-reports/report_chromium.html --self-contained-html
+
+      - name: List directories and files
+        run: |
+          echo "Listing all directories and files:"
+          find test-reports
+
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
