@@ -36,7 +36,7 @@ jobs:
       - name: Run Playwright tests in Chromium
         run: |
           mkdir -p test-reports
-          pytest --tracing=retain-on-failure --browser=chromium --html=test-reports/report_chromium.html --self-contained-html --tracing=retain-on-failure
+          pytest --browser=chromium --html=test-reports/report_chromium.html --self-contained-html --tracing=retain-on-failure --output=test-reports/traces/chromium
 
       - name: Upload HTML report for Chromium
         uses: actions/upload-artifact@v4
@@ -47,8 +47,8 @@ jobs:
       - name: Upload Playwright traces
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-traces
-          path: test-reports/traces/
+          name: playwright-traces-chromium
+          path: test-reports/traces/chromium/
 
   multiple-browsers:
     if: github.event.inputs.run_type == 'multiple'
@@ -77,7 +77,7 @@ jobs:
       - name: Run Playwright tests in ${{ matrix.browser }}
         run: |
           mkdir -p test-reports
-          pytest --tracing=retain-on-failure --browser=${{ matrix.browser }} --html=test-reports/report_${{ matrix.browser }}.html --self-contained-html --tracing=retain-on-failure
+          pytest --browser=${{ matrix.browser }} --html=test-reports/report_${{ matrix.browser }}.html --self-contained-html --tracing=retain-on-failure --output=test-reports/traces/${{ matrix.browser }}
 
       - name: Upload HTML report for ${{ matrix.browser }}
         uses: actions/upload-artifact@v4
@@ -88,5 +88,5 @@ jobs:
       - name: Upload Playwright traces
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-traces
-          path: test-reports/traces/
+          name: playwright-traces-${{ matrix.browser }}
+          path: test-reports/traces/${{ matrix.browser }}/
