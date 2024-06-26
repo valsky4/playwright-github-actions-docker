@@ -1,4 +1,5 @@
 name: Playwright Tests
+
 on:
   workflow_dispatch:
     inputs:
@@ -36,19 +37,13 @@ jobs:
       - name: Run Playwright tests in Chromium
         run: |
           mkdir -p test-reports
-          pytest --browser=chromium --html=test-reports/report_chromium.html --self-contained-html --tracing=retain-on-failure --output=test-reports/traces/chromium
-
-      - name: Upload HTML report for Chromium
-        uses: actions/upload-artifact@v4
+          pytest --browser=chromium --html=test-reports/report_chromium.html --self-contained-html
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
         with:
-          name: html-report-chromium
-          path: test-reports/report_chromium.html
+          name: playwright-traces
+          path: test-results/
 
-      - name: Upload Playwright traces
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-traces-chromium
-          path: test-reports/traces/chromium/
 
   multiple-browsers:
     if: github.event.inputs.run_type == 'multiple'
@@ -77,16 +72,11 @@ jobs:
       - name: Run Playwright tests in ${{ matrix.browser }}
         run: |
           mkdir -p test-reports
-          pytest --browser=${{ matrix.browser }} --html=test-reports/report_${{ matrix.browser }}.html --self-contained-html --tracing=retain-on-failure --output=test-reports/traces/${{ matrix.browser }}
+          pytest --browser=${{ matrix.browser }} --html=test-reports/report_${{ matrix.browser }}.html --self-contained-html
 
-      - name: Upload HTML report for ${{ matrix.browser }}
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
         with:
-          name: html-report-${{ matrix.browser }}
-          path: test-reports/report_${{ matrix.browser }}.html
+          name: playwright-traces
+          path: test-results/
 
-      - name: Upload Playwright traces
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-traces-${{ matrix.browser }}
-          path: test-reports/traces/${{ matrix.browser }}/
