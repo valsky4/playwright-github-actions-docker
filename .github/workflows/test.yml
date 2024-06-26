@@ -39,18 +39,21 @@ jobs:
           mkdir -p test-reports
           pytest --browser=chromium --html=test-reports/report_chromium.html --self-contained-html
 
-      - name: Upload HTML report for Chromium
-        uses: actions/upload-artifact@v4
-        with:
-          name: html-report-chromium
-          path: test-reports/report_chromium.html
+      - name: Collect artifacts
+        run: |
+          mkdir -p combined-artifacts
+          cp -r test-reports/* combined-artifacts/
+          cp -r test-results/videos combined-artifacts/  # assuming videos are saved here
+          cp -r test-results/screenshots combined-artifacts/  # assuming screenshots are saved here
 
-      - name: Upload Playwright traces and videos
-        if: ${{ !cancelled() }}
+      - name: Create zip archive
+        run: zip -r combined-artifacts.zip combined-artifacts
+
+      - name: Upload combined artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-traces-videos
-          path: test-reports/videos/
+          name: combined-artifacts
+          path: combined-artifacts.zip
 
   multiple-browsers:
     if: github.event.inputs.run_type == 'multiple'
@@ -81,15 +84,18 @@ jobs:
           mkdir -p test-reports
           pytest --browser=${{ matrix.browser }} --html=test-reports/report_${{ matrix.browser }}.html --self-contained-html
 
-      - name: Upload HTML report for ${{ matrix.browser }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: html-report-${{ matrix.browser }}
-          path: test-reports/report_${{ matrix.browser }}.html
+      - name: Collect artifacts for ${{ matrix.browser }}
+        run: |
+          mkdir -p combined-artifacts
+          cp -r test-reports/* combined-artifacts/
+          cp -r test-results/videos combined-artifacts/  # assuming videos are saved here
+          cp -r test-results/screenshots combined-artifacts/  # assuming screenshots are saved here
 
-      - name: Upload Playwright traces and videos
-        if: ${{ !cancelled() }}
+      - name: Create zip archive
+        run: zip -r combined-artifacts.zip combined-artifacts
+
+      - name: Upload combined artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-traces-videos
-          path: test-reports/videos/
+          name: combined-artifacts
+          path: combined-artifacts.zip
