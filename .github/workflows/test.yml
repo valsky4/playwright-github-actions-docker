@@ -35,8 +35,8 @@ jobs:
 
       - name: Run Playwright tests in Chromium
         run: |
-          mkdir -p test-reports/traces
-          pytest --browser=chromium --html=test-reports/report_chromium.html --self-contained-html --tracing=retain-on-failure
+          mkdir -p test-reports
+          pytest --tracing=retain-on-failure --browser=chromium --html=test-reports/report_chromium.html --self-contained-html --tracing=retain-on-failure
 
       - name: Upload HTML report for Chromium
         uses: actions/upload-artifact@v4
@@ -44,15 +44,7 @@ jobs:
           name: html-report-chromium
           path: test-reports/report_chromium.html
 
-      - name: Check if traces directory is empty
-        run: |
-          if [ -z "$(ls -A test-reports/traces)" ]; then
-            echo "No traces to upload";
-            exit 0;
-          fi
-
       - name: Upload Playwright traces
-        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-traces
@@ -64,7 +56,7 @@ jobs:
     name: Run tests in multiple browsers (Chromium, WebKit, and Firefox)
     strategy:
       matrix:
-        browser: [chromium, webkit, firefox]
+        browser: [ chromium, webkit, firefox ]
 
     steps:
       - name: Checkout code
@@ -84,8 +76,8 @@ jobs:
 
       - name: Run Playwright tests in ${{ matrix.browser }}
         run: |
-          mkdir -p test-reports/traces
-          pytest --browser=${{ matrix.browser }} --html=test-reports/report_${{ matrix.browser }}.html --self-contained-html --tracing=retain-on-failure
+          mkdir -p test-reports
+          pytest --tracing=retain-on-failure --browser=${{ matrix.browser }} --html=test-reports/report_${{ matrix.browser }}.html --self-contained-html --tracing=retain-on-failure
 
       - name: Upload HTML report for ${{ matrix.browser }}
         uses: actions/upload-artifact@v4
@@ -93,15 +85,7 @@ jobs:
           name: html-report-${{ matrix.browser }}
           path: test-reports/report_${{ matrix.browser }}.html
 
-      - name: Check if traces directory is empty
-        run: |
-          if [ -z "$(ls -A test-reports/traces)" ]; then
-            echo "No traces to upload";
-            exit 0;
-          fi
-
       - name: Upload Playwright traces
-        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-traces
