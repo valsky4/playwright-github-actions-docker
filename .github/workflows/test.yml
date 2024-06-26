@@ -31,19 +31,19 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pytest-playwright
+          pip install pytest-playwright pytest-html
           playwright install
 
       - name: Run Playwright tests in Chromium
         run: |
           mkdir -p test-reports
-          pytest --browser=chromium --junitxml=test-reports/results_chromium.xml
+          pytest --browser=chromium --html=test-reports/report_chromium.html
 
-      - name: Upload test report for Chromium
+      - name: Upload HTML report for Chromium
         uses: actions/upload-artifact@v4
         with:
-          name: test-report-chromium
-          path: test-reports/results_chromium.xml
+          name: html-report-chromium
+          path: test-reports/report_chromium.html
 
   multiple-browsers:
     if: github.event.inputs.run_type == 'multiple'
@@ -51,7 +51,7 @@ jobs:
     name: Run tests in multiple browsers (Chromium, WebKit, and Firefox)
     strategy:
       matrix:
-        browser: [ chromium, webkit, firefox ]
+        browser: [chromium, webkit, firefox]
 
     steps:
       - name: Checkout code
@@ -66,19 +66,19 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pytest-playwright
+          pip install pytest-playwright pytest-html
           playwright install
 
       - name: Run Playwright tests in ${{ matrix.browser }}
         run: |
           mkdir -p test-reports
-          pytest --browser=${{ matrix.browser }} --junitxml=test-reports/results_${{ matrix.browser }}.xml
+          pytest --browser=${{ matrix.browser }} --html=test-reports/report_${{ matrix.browser }}.html
 
-      - name: Upload test report for ${{ matrix.browser }}
+      - name: Upload HTML report for ${{ matrix.browser }}
         uses: actions/upload-artifact@v4
         with:
-          name: test-report-${{ matrix.browser }}
-          path: test-reports/results_${{ matrix.browser }}.xml
+          name: html-report-${{ matrix.browser }}
+          path: test-reports/report_${{ matrix.browser }}.html
 
       - name: Upload Playwright traces
         if: ${{ !cancelled() }}
