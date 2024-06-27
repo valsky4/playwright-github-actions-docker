@@ -4,16 +4,16 @@ on:
   workflow_dispatch:
     inputs:
       browser:
-        description: 'Browser(s) to run tests on'
+        description: 'Browser or device to run tests on'
         required: true
-        default: 'single-desktop'
+        default: 'browser-chromium'
         type: choice
         options:
-          - single-desktop
-          - multiple-desktop
+          - browser-chromium
+          - browser-webkit
+          - browser-firefox
           - iphone-13
           - galaxy-s9
-          - combination
 
 jobs:
   test:
@@ -31,43 +31,51 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-
-      - name: Install default browsers (Chromium, WebKit, Firefox)
-        if: ${{ github.event.inputs.browser == 'multiple-desktop' || github.event.inputs.browser == 'combination' }}
-        run: playwright install --with-deps chromium webkit firefox
+          pip install pytest-html
 
       - name: Install Chromium
-        if: ${{ github.event.inputs.browser == 'single-desktop' || github.event.inputs.browser == 'combination' }}
+        if: ${{ github.event.inputs.browser == 'browser-chromium' }}
         run: playwright install --with-deps chromium
 
-      - name: Install WebKit for iPhone 13
-        if: ${{ github.event.inputs.browser == 'iphone-13' || github.event.inputs.browser == 'combination' }}
+      - name: Install WebKit
+        if: ${{ github.event.inputs.browser == 'browser-webkit' }}
+        run: playwright install --with-deps webkit
+
+      - name: Install Firefox
+        if: ${{ github.event.inputs.browser == 'browser-firefox' }}
+        run: playwright install --with-deps firefox
+
+      - name: Install Chromium for iPhone 13
+        if: ${{ github.event.inputs.browser == 'iphone-13' }}
         run: playwright install --with-deps chromium
 
       - name: Install Chromium for Galaxy S9+
-        if: ${{ github.event.inputs.browser == 'galaxy-s9' || github.event.inputs.browser == 'combination' }}
+        if: ${{ github.event.inputs.browser == 'galaxy-s9' }}
         run: playwright install --with-deps chromium
 
       - name: Run tests on Chromium
-        if: ${{ github.event.inputs.browser == 'single-desktop' || github.event.inputs.browser == 'combination' }}
-        run: pytest --tracing=retain-on-failure --browser chromium
+        if: ${{ github.event.inputs.browser == 'browser-chromium' }}
+        run: pytest --tracing=retain-on-failure --browser chromium --html=test-results/report.html
 
-      - name: Run tests on WebKit and Firefox
-        if: ${{ github.event.inputs.browser == 'multiple-desktop' || github.event.inputs.browser == 'combination' }}
-        run: |
-          pytest --tracing=retain-on-failure --browser webkit
-          pytest --tracing=retain-on-failure --browser firefox
+      - name: Run tests on WebKit
+        if: ${{ github.event.inputs.browser == 'browser-webkit' }}
+        run: pytest --tracing=retain-on-failure --browser webkit --html=test-results/report.html
+
+      - name: Run tests on Firefox
+        if: ${{ github.event.inputs.browser == 'browser-firefox' }}
+        run: pytest --tracing=retain-on-failure --browser firefox --html=test-results/report.html
 
       - name: Run tests on iPhone 13
-        if: ${{ github.event.inputs.browser == 'iphone-13' || github.event.inputs.browser == 'combination' }}
-        run: pytest --tracing=retain-on-failure --device="iPhone 13"
+        if: ${{ github.event.inputs.browser == 'iphone-13' }}
+        run: pytest --tracing=retain-on-failure --device="iPhone 13" --browser chromium --html=test-results/report.html
 
       - name: Run tests on Galaxy S9+
-        if: ${{ github.event.inputs.browser == 'galaxy-s9' || github.event.inputs.browser == 'combination' }}
-        run: pytest --tracing=retain-on-failure --device="Galaxy S9+"
+        if: ${{ github.event.inputs.browser == 'galaxy-s9' }}
+        run: pytest --tracing=retain-on-failure --device="Galaxy S9+" --browser chromium --html=test-results/report.html
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload Playwright traces and HTML report
+        uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
-          name: playwright-traces
+          name: playwright-traces-and-report
           path: test-results/
