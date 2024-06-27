@@ -55,17 +55,17 @@ jobs:
               pytest --tracing=retain-on-failure --browser chromium
               ;;
             "single-mobile")
-              pytest --tracing=retain-on-failure --browser 'chromium:emulator=Pixel 5'
+              pytest --tracing=retain-on-failure --device="Galaxy S9+"
               ;;
             "multiple-mobile")
-              pytest --tracing=retain-on-failure --device="webkit=iPad (gen 6)"
+              pytest --tracing=retain-on-failure --device="iPad (gen 6)"
               pytest --tracing=retain-on-failure --device="Galaxy S9+"
               ;;
             "combination")
               pytest --tracing=retain-on-failure --browser webkit
               pytest --tracing=retain-on-failure --browser firefox
               pytest --tracing=retain-on-failure --browser chromium
-              pytest --tracing=retain-on-failure --device="webkit=iPad (gen 6)"
+              pytest --tracing=retain-on-failure --device="iPad (gen 6)"
               pytest --tracing=retain-on-failure --device="Galaxy S9+"
               ;;
             *)
