@@ -42,7 +42,7 @@ jobs:
 
       - name: Install WebKit for iPhone 13
         if: ${{ github.event.inputs.browser == 'iphone-13' || github.event.inputs.browser == 'combination' }}
-        run: playwright install --with-deps webkit
+        run: playwright install --with-deps chromium
 
       - name: Install Chromium for Galaxy S9+
         if: ${{ github.event.inputs.browser == 'galaxy-s9' || github.event.inputs.browser == 'combination' }}
