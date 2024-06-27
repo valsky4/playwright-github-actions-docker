@@ -3,8 +3,8 @@ name: Playwright Tests
 on:
   workflow_dispatch:
     inputs:
-      run_type:
-        description: 'Choose the type of run: single or multiple browsers'
+      browser:
+        description: 'Browser(s) to run tests on'
         required: true
         default: 'single'
         type: choice
@@ -13,14 +13,11 @@ on:
           - multiple
 
 jobs:
-  single-browser:
-    if: github.event.inputs.run_type == 'single'
+  test:
+    timeout-minutes: 60
     runs-on: ubuntu-latest
-    name: Run tests in single browser (Chromium)
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -31,73 +28,24 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pytest-playwright pytest-html
-          playwright install
 
-      - name: Run Playwright tests in Chromium
+      - name: Ensure browsers are installed
         run: |
-          mkdir -p test-reports/traces/chromium
-          pytest --browser=chromium --html=test-reports/report_chromium.html --self-contained-html --tracing=retain-on-failure --output=test-reports/traces/chromium
+          if [[ "${{ github.event.inputs.browser }}" == 'multiple' ]]; then
+            python -m playwright install --with-deps chromium webkit
+          else
+            python -m playwright install --with-deps chromium
+          fi
 
-      - name: List directories and files
+      - name: Run your tests
         run: |
-          echo "Listing all directories and files:"
-          find test-reports
+          if [[ "${{ github.event.inputs.browser }}" == 'multiple' ]]; then
+            pytest --tracing=retain-on-failure --browser webkit
+          fi
+          pytest --tracing=retain-on-failure --browser chromium
 
-      - name: Upload HTML report for Chromium
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
         with:
-          name: html-report-chromium
-          path: test-reports/report_chromium.html
-
-      - name: Upload Playwright traces for Chromium
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-traces-chromium
-          path: test-reports/traces/chromium
-
-  multiple-browsers:
-    if: github.event.inputs.run_type == 'multiple'
-    runs-on: ubuntu-latest
-    name: Run tests in multiple browsers (Chromium, WebKit, and Firefox)
-    strategy:
-      matrix:
-        browser: [ chromium, webkit, firefox ]
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.12'
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pytest-playwright pytest-html
-          playwright install
-
-      - name: Run Playwright tests in ${{ matrix.browser }}
-        run: |
-          mkdir -p test-reports/traces/${{ matrix.browser }}
-          pytest --browser=${{ matrix.browser }} --html=test-reports/report_${{ matrix.browser }}.html --self-contained-html --tracing=retain-on-failure --output=test-reports/traces/${{ matrix.browser }}
-
-      - name: List directories and files
-        run: |
-          echo "Listing all directories and files:"
-          find test-reports
-
-      - name: Upload HTML report for ${{ matrix.browser }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: html-report-${{ matrix.browser }}
-          path: test-reports/report_${{ matrix.browser }}.html
-
-      - name: Upload Playwright traces for ${{ matrix.browser }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-traces-${{ matrix.browser }}
-          path: test-reports/traces/${{ matrix.browser }}
+          name: playwright-traces
+          path: test-results/
