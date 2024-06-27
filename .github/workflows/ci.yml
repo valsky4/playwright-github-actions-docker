@@ -3,16 +3,16 @@ name: Playwright Tests
 on:
   workflow_dispatch:
     inputs:
-      target:
-        description: 'Target to run tests on'
+      browser:
+        description: 'Browser(s) to run tests on'
         required: true
         default: 'single-desktop'
         type: choice
         options:
           - single-desktop
           - multiple-desktop
-          - single-mobile
-          - multiple-mobile
+          - iphone-13
+          - galaxy-s9
           - combination
 
 jobs:
@@ -25,53 +25,46 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.11'
+          python-version: '3.12'
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Ensure browsers are installed
-        run: |
-          case "${{ github.event.inputs.target }}" in
-            "multiple-desktop")
-              python -m playwright install --with-deps chromium webkit firefox
-              ;;
-            "single-mobile"|"multiple-mobile"|"combination")
-              python -m playwright install --with-deps chromium webkit firefox
-              ;;
-            *)
-              python -m playwright install --with-deps chromium
-              ;;
-          esac
+      - name: Install default browsers (Chromium, WebKit, Firefox)
+        if: ${{ github.event.inputs.browser == 'multiple-desktop' || github.event.inputs.browser == 'combination' }}
+        run: playwright install --with-deps chromium webkit firefox
 
-      - name: Run your tests
+      - name: Install Chromium
+        if: ${{ github.event.inputs.browser == 'single-desktop' || github.event.inputs.browser == 'combination' }}
+        run: playwright install --with-deps chromium
+
+      - name: Install WebKit for iPhone 13
+        if: ${{ github.event.inputs.browser == 'iphone-13' || github.event.inputs.browser == 'combination' }}
+        run: playwright install --with-deps webkit
+
+      - name: Install Chromium for Galaxy S9+
+        if: ${{ github.event.inputs.browser == 'galaxy-s9' || github.event.inputs.browser == 'combination' }}
+        run: playwright install --with-deps chromium
+
+      - name: Run tests on Chromium
+        if: ${{ github.event.inputs.browser == 'single-desktop' || github.event.inputs.browser == 'combination' }}
+        run: pytest --tracing=retain-on-failure --browser chromium
+
+      - name: Run tests on WebKit and Firefox
+        if: ${{ github.event.inputs.browser == 'multiple-desktop' || github.event.inputs.browser == 'combination' }}
         run: |
-          case "${{ github.event.inputs.target }}" in
-            "multiple-desktop")
-              pytest --tracing=retain-on-failure --browser webkit
-              pytest --tracing=retain-on-failure --browser firefox
-              pytest --tracing=retain-on-failure --browser chromium
-              ;;
-            "single-mobile")
-              pytest --tracing=retain-on-failure --device="Galaxy S9+"
-              ;;
-            "multiple-mobile")
-              pytest --tracing=retain-on-failure --device="iPad (gen 6)"
-              pytest --tracing=retain-on-failure --device="Galaxy S9+"
-              ;;
-            "combination")
-              pytest --tracing=retain-on-failure --browser webkit
-              pytest --tracing=retain-on-failure --browser firefox
-              pytest --tracing=retain-on-failure --browser chromium
-              pytest --tracing=retain-on-failure --device="iPad (gen 6)"
-              pytest --tracing=retain-on-failure --device="Galaxy S9+"
-              ;;
-            *)
-              pytest --tracing=retain-on-failure --browser chromium
-              ;;
-          esac
+          pytest --tracing=retain-on-failure --browser webkit
+          pytest --tracing=retain-on-failure --browser firefox
+
+      - name: Run tests on iPhone 13
+        if: ${{ github.event.inputs.browser == 'iphone-13' || github.event.inputs.browser == 'combination' }}
+        run: pytest --tracing=retain-on-failure --device="iPhone 13"
+
+      - name: Run tests on Galaxy S9+
+        if: ${{ github.event.inputs.browser == 'galaxy-s9' || github.event.inputs.browser == 'combination' }}
+        run: pytest --tracing=retain-on-failure --device="Galaxy S9+"
 
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
