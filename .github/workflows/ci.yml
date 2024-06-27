@@ -3,14 +3,17 @@ name: Playwright Tests
 on:
   workflow_dispatch:
     inputs:
-      browser:
-        description: 'Browser(s) to run tests on'
+      target:
+        description: 'Target to run tests on'
         required: true
-        default: 'single'
+        default: 'single-desktop'
         type: choice
         options:
-          - single
-          - multiple
+          - single-desktop
+          - multiple-desktop
+          - single-mobile
+          - multiple-mobile
+          - combination
 
 jobs:
   test:
@@ -22,7 +25,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.12'
+          python-version: '3.11'
 
       - name: Install dependencies
         run: |
@@ -31,18 +34,44 @@ jobs:
 
       - name: Ensure browsers are installed
         run: |
-          if [[ "${{ github.event.inputs.browser }}" == 'multiple' ]]; then
-            python -m playwright install --with-deps chromium webkit
-          else
-            python -m playwright install --with-deps chromium
-          fi
+          case "${{ github.event.inputs.target }}" in
+            "multiple-desktop")
+              python -m playwright install --with-deps chromium webkit firefox
+              ;;
+            "single-mobile"|"multiple-mobile"|"combination")
+              python -m playwright install --with-deps chromium webkit firefox
+              ;;
+            *)
+              python -m playwright install --with-deps chromium
+              ;;
+          esac
 
       - name: Run your tests
         run: |
-          if [[ "${{ github.event.inputs.browser }}" == 'multiple' ]]; then
-            pytest --tracing=retain-on-failure --browser webkit
-          fi
-          pytest --tracing=retain-on-failure --browser chromium
+          case "${{ github.event.inputs.target }}" in
+            "multiple-desktop")
+              pytest --tracing=retain-on-failure --browser webkit
+              pytest --tracing=retain-on-failure --browser firefox
+              pytest --tracing=retain-on-failure --browser chromium
+              ;;
+            "single-mobile")
+              pytest --tracing=retain-on-failure --browser 'chromium:emulator=Pixel 5'
+              ;;
+            "multiple-mobile")
+              pytest --tracing=retain-on-failure --browser 'webkit:emulator=iPhone 13'
+              pytest --tracing=retain-on-failure --browser 'chromium:emulator=Pixel 5'
+              ;;
+            "combination")
+              pytest --tracing=retain-on-failure --browser webkit
+              pytest --tracing=retain-on-failure --browser firefox
+              pytest --tracing=retain-on-failure --browser chromium
+              pytest --tracing=retain-on-failure --browser 'webkit:emulator=iPhone 13'
+              pytest --tracing=retain-on-failure --browser 'chromium:emulator=Pixel 5'
+              ;;
+            *)
+              pytest --tracing=retain-on-failure --browser chromium
+              ;;
+          esac
 
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
