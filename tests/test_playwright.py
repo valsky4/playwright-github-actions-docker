@@ -1,6 +1,6 @@
 from playwright.sync_api import Page
 
-from pages.test_playwright import PlaywrightPage
+from pages.playwright_page import PlaywrightPage
 
 
 def test_has_title(page: Page):
