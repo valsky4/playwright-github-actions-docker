@@ -47,7 +47,7 @@ jobs:
 
       - name: Install Chromium for iPhone 13
         if: ${{ github.event.inputs.browser == 'iphone-13' }}
-        run: playwright install --with-deps chromium
+        run: playwright install --with-deps webkit
 
       - name: Install Chromium for Galaxy S9+
         if: ${{ github.event.inputs.browser == 'galaxy-s9' }}
@@ -55,23 +55,23 @@ jobs:
 
       - name: Run tests on Chromium
         if: ${{ github.event.inputs.browser == 'browser-chromium' }}
-        run: pytest --tracing=retain-on-failure --browser chromium --html=test-results/report.html
+        run: pytest --browser chromium --html=test-results/report.html --self-contained-html
 
       - name: Run tests on WebKit
         if: ${{ github.event.inputs.browser == 'browser-webkit' }}
-        run: pytest --tracing=retain-on-failure --browser webkit --html=test-results/report.html
+        run: pytest --browser webkit --html=test-results/report.html --self-contained-html
 
       - name: Run tests on Firefox
         if: ${{ github.event.inputs.browser == 'browser-firefox' }}
-        run: pytest --tracing=retain-on-failure --browser firefox --html=test-results/report.html
+        run: pytest --browser firefox --html=test-results/report.html --self-contained-html
 
       - name: Run tests on iPhone 13
         if: ${{ github.event.inputs.browser == 'iphone-13' }}
-        run: pytest --tracing=retain-on-failure --device="iPhone 13" --browser chromium --html=test-results/report.html
+        run: pytest --device="iPhone 13" --browser webkit --html=test-results/report.html --self-contained-html
 
       - name: Run tests on Galaxy S9+
         if: ${{ github.event.inputs.browser == 'galaxy-s9' }}
-        run: pytest --tracing=retain-on-failure --device="Galaxy S9+" --browser chromium --html=test-results/report.html
+        run: pytest --device="Galaxy S9+" --browser chromium --html=test-results/report.html --self-contained-html
 
       - name: Upload Playwright traces and HTML report
         uses: actions/upload-artifact@v4
