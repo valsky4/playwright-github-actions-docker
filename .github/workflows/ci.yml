@@ -39,7 +39,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pytest-html
-          mkdir -p test-results
 
       - name: Install Browser
         if: ${{ github.event.inputs.test_type == 'web' || github.event.inputs.test_type == 'both' }}
@@ -47,11 +46,15 @@ jobs:
 
       - name: Run API tests
         if: ${{ github.event.inputs.test_type == 'api' || github.event.inputs.test_type == 'both' }}
-        run: pytest -m apitest --html=test-results/api-report.html --self-contained-html
+        run: |
+          mkdir -p test-results
+          pytest -m apitest --html=test-results/api-report.html --self-contained-html
 
       - name: Run Web tests
         if: ${{ github.event.inputs.test_type == 'web' || github.event.inputs.test_type == 'both' }}
-        run: pytest -m webtest --browser ${{ github.event.inputs.browser }} --html=test-results/web-report.html --self-contained-html
+        run: |
+          mkdir -p test-results
+          pytest -m webtest --browser ${{ github.event.inputs.browser }} --html=test-results/web-report.html --self-contained-html
 
       - name: Upload Test Results
         uses: actions/upload-artifact@v4
