@@ -26,6 +26,10 @@ jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
+    env:
+      DEV_API_URL: ${{ secrets.DEV_API_URL }}
+      DEV_CLIENT: ${{ secrets.DEV_CLIENT }}
+      DEV_DB: ${{ secrets.DEV_DB }}
     steps:
       - uses: actions/checkout@v4
 
