@@ -3,17 +3,24 @@ name: Playwright Tests
 on:
   workflow_dispatch:
     inputs:
-      browser:
-        description: 'Browser or device to run tests on'
+      test_type:
+        description: 'Type of tests to run'
         required: true
-        default: 'browser-chromium'
+        default: 'web'
         type: choice
         options:
-          - browser-chromium
-          - browser-webkit
-          - browser-firefox
-          - iphone-13
-          - galaxy-s9
+          - api
+          - web
+          - both
+      browser:
+        description: 'Browser to run web tests on (required for web tests)'
+        required: false
+        default: 'chromium'
+        type: choice
+        options:
+          - chromium
+          - webkit
+          - firefox
 
 jobs:
   test:
@@ -32,34 +39,23 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pytest-html
+          mkdir -p test-results
 
-      - name: Install Chromium
-        if: ${{ github.event.inputs.browser == 'browser-chromium' }}
-        run: playwright install --with-deps chromium
+      - name: Install Browser
+        if: ${{ github.event.inputs.test_type == 'web' || github.event.inputs.test_type == 'both' }}
+        run: playwright install --with-deps ${{ github.event.inputs.browser }}
 
-      - name: Install WebKit
-        if: ${{ github.event.inputs.browser == 'browser-webkit' }}
-        run: playwright install --with-deps webkit
+      - name: Run API tests
+        if: ${{ github.event.inputs.test_type == 'api' || github.event.inputs.test_type == 'both' }}
+        run: pytest -m apitest --html=test-results/api-report.html --self-contained-html
 
-      - name: Install Firefox
-        if: ${{ github.event.inputs.browser == 'browser-firefox' }}
-        run: playwright install --with-deps firefox
+      - name: Run Web tests
+        if: ${{ github.event.inputs.test_type == 'web' || github.event.inputs.test_type == 'both' }}
+        run: pytest -m webtest --browser ${{ github.event.inputs.browser }} --html=test-results/web-report.html --self-contained-html
 
-      - name: Run tests on Chromium
-        if: ${{ github.event.inputs.browser == 'browser-chromium' }}
-        run: pytest -m web --browser chromium --html=test-results/report.html --self-contained-html
-
-      - name: Run tests on WebKit
-        if: ${{ github.event.inputs.browser == 'browser-webkit' }}
-        run: pytest -m web --browser webkit --html=test-results/report.html --self-contained-html
-
-      - name: Run tests on Firefox
-        if: ${{ github.event.inputs.browser == 'browser-firefox' }}
-        run: pytest -m web --browser firefox --html=test-results/report.html --self-contained-html
-
-      - name: Upload Playwright traces and HTML report
+      - name: Upload Test Results
         uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
+        if: always()
         with:
-          name: playwright-traces-and-report
+          name: test-results
           path: test-results/
