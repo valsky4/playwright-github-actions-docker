@@ -2,6 +2,7 @@ import os
 import subprocess
 import time
 
+import allure
 import pytest
 from playwright.sync_api import APIRequestContext, Playwright
 from pymongo import MongoClient
@@ -143,3 +144,25 @@ def vpn_connection(env_data):
         subprocess.check_call(["sudo", "killall", "openvpn"])
     except subprocess.CalledProcessError as e:
         print(f"Failed to stop VPN connection: {e}")
+
+@pytest.hookimpl(hookwrapper=True)
+def pytest_runtest_makereport(item, call):
+    """
+    Hook to add screenshots to the Allure report on test failure.
+    """
+    # Execute all other hooks to obtain the report object
+    outcome = yield
+    report = outcome.get_result()
+
+    if report.when == 'call' and report.failed:
+        # Get the page object from the test function's fixtures
+        page = item.funcargs.get('page', None)
+        if page:
+            # Capture screenshot
+            screenshot = page.screenshot()
+            # Attach screenshot to Allure report
+            allure.attach(
+                screenshot,
+                name="Screenshot",
+                attachment_type=allure.attachment_type.PNG
+            )
