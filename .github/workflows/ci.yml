@@ -47,18 +47,22 @@ jobs:
       - name: Run API tests
         if: ${{ github.event.inputs.test_type == 'api' || github.event.inputs.test_type == 'both' }}
         run: |
-          mkdir -p test-results
-          pytest -m apitest --html=test-results/api-report.html --self-contained-html
+          echo "Current working directory: $(pwd)"
+          ls -la
+          mkdir -p $GITHUB_WORKSPACE/test-results
+          pytest -m apitest --html=$GITHUB_WORKSPACE/test-results/api-report.html --self-contained-html
 
       - name: Run Web tests
         if: ${{ github.event.inputs.test_type == 'web' || github.event.inputs.test_type == 'both' }}
         run: |
-          mkdir -p test-results
-          pytest -m webtest --browser ${{ github.event.inputs.browser }} --html=test-results/web-report.html --self-contained-html
+          echo "Current working directory: $(pwd)"
+          ls -la
+          mkdir -p $GITHUB_WORKSPACE/test-results
+          pytest -m webtest --browser ${{ github.event.inputs.browser }} --html=$GITHUB_WORKSPACE/test-results/web-report.html --self-contained-html
 
       - name: Upload Test Results
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: test-results
-          path: test-results/
+          path: ${{ github.workspace }}/test-results/
