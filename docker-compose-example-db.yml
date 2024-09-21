@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:latest
+    container_name: my-mongo-container
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+      MONGO_INITDB_DATABASE: testdb
+    ports:
+      - "27017:27017"
+    command: >
+      bash -c 'echo "db.createCollection(\"users\");
+      db.users.insertOne({username: \"admin\", password: \"password123\"});" \
+      > /docker-entrypoint-initdb.d/init.js && docker-entrypoint.sh mongod'
