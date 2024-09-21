@@ -1,14 +1,14 @@
 import pytest
 from playwright.sync_api import APIRequestContext, Page, expect
 
-from helpers.db import get_user_data
+# from helpers.db import get_user_data
 from pages.demo_qa_page import DemoQaHomepage
 
 
-@pytest.mark.dbtest
-def test_db_user_data(mongodb_client):
-    result = get_user_data(mongodb_client)
-    assert result == ('admin', 'password123')
+# @pytest.mark.dbtest
+# def test_db_user_data(mongodb_client):
+#     result = get_user_data(mongodb_client)
+#     assert result == ('admin', 'password123')
 
 
 @pytest.mark.apitest

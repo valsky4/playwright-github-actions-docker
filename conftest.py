@@ -6,7 +6,7 @@ import pytest
 from playwright.sync_api import APIRequestContext, Playwright
 from pymongo import MongoClient
 
-from helpers.db import get_user_data
+# from helpers.db import get_user_data
 from helpers.vpn import is_vpn_connected
 from env_data import EnvData
 
@@ -30,23 +30,30 @@ def env_data(pytestconfig) -> EnvData:
     based on the specified environment.
     """
     environment = pytestconfig.getoption("environment").upper()
+
+    if environment not in ["DEV", "STAGE"]:
+        raise ValueError(f"The environment variable {environment} is not valid.")
+    else:
+        print("\nStarting the tests on", environment)
     try:
         return EnvData(desired_env=environment)
     except ValueError as e:
         pytest.exit(str(e))
 
 
+# commented for the sake of the githubactions
 @pytest.fixture(scope='session')
 def mongodb_client(env_data) -> MongoClient:
     """
     Provides a MongoClient instance that persists across all tests.
     """
-    print("\n[Setup] Connecting to MongoDB")
-    connection_string = env_data.db
-    client = MongoClient(connection_string)
-    yield client
-    print("\n[Teardown] Closing MongoDB connection")
-    client.close()
+    pass
+    # print("\n[Setup] Connecting to MongoDB")
+    # connection_string = env_data.db
+    # client = MongoClient(connection_string)
+    # yield client
+    # print("\n[Teardown] Closing MongoDB connection")
+    # client.close()
 
 
 @pytest.fixture(scope="session")
@@ -64,7 +71,9 @@ def auth_token(api_request_context: APIRequestContext, mongodb_client: MongoClie
     """
     Retrieves an authentication token and provides it to tests.
     """
-    credentials = get_user_data(mongodb_client)
+    # commented due to githubactions test and not to build containers
+    # credentials = get_user_data(mongodb_client)
+    credentials = ('admin', 'password123')
     if credentials is None:
         pytest.exit("Failed to retrieve credentials from the database.")
 

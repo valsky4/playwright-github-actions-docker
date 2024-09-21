@@ -6,7 +6,7 @@ load_dotenv()
 
 
 class EnvData:
-    def __init__(self, desired_env: str = 'DEV'):
+    def __init__(self, desired_env: str = None):
         self.api_url: str = os.getenv(f"{desired_env}_API_URL")
         self.db: str = os.getenv(f"{desired_env}_DB")
         self.client: str = os.getenv(f"{desired_env}_CLIENT")
