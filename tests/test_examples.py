@@ -1,14 +1,17 @@
+import pytest
 from playwright.sync_api import APIRequestContext, Page, expect
 
 from helpers.db import get_user_data
 from pages.demo_qa_page import DemoQaHomepage
 
 
+@pytest.mark.dbtest
 def test_db_user_data(mongodb_client):
     result = get_user_data(mongodb_client)
     assert result == ('admin', 'password123')
 
 
+@pytest.mark.apitest
 def test_api_call_with_valid_data(api_request_context: APIRequestContext, auth_token: str):
     """
         Test creating and updating a booking with valid data.
@@ -58,6 +61,7 @@ def test_api_call_with_valid_data(api_request_context: APIRequestContext, auth_t
     print("Booking updated successfully:", response_data)
 
 
+@pytest.mark.webtest
 def test_demo_qa_homepage(env_data, page: Page):
     """
     Test that navigates to the demoqa homepage and verifies the page title.
@@ -83,6 +87,7 @@ def test_demo_qa_homepage(env_data, page: Page):
     print("Navigated to the Elements page successfully.")
 
 
+@pytest.mark.webtest
 def test_demo_qa_homepage_failure(env_data, page: Page):
     """
     Test that navigates to the demoqa homepage and verifies the page title.
@@ -108,6 +113,7 @@ def test_demo_qa_homepage_failure(env_data, page: Page):
     print("Navigated to the Elements page successfully.")
 
 
+@pytest.mark.webtest
 def test_demo_qa_homepage_failure_two(env_data, page: Page):
     """
     Test that navigates to the demoqa homepage and verifies the page title.
