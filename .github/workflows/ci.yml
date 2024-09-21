@@ -63,7 +63,7 @@ jobs:
       - name: Run Web tests
         if: contains('web,both,all browsers,all browsers and api', github.event.inputs.test_type)
         run: |
-          sudo mkdir -p test-results/traces
+          mkdir -p test-results/traces
           if [[ "${{ github.event.inputs.test_type }}" == "web" || "${{ github.event.inputs.test_type }}" == "both" ]]; then
             pytest -m webtest --browser ${{ github.event.inputs.browser }} --output=test-results/traces
           else
