@@ -12,6 +12,8 @@ on:
           - api
           - web
           - both
+          - all browsers
+          - all browsers and api
       browser:
         description: 'Browser to run web tests on (required for web tests)'
         required: false
@@ -24,12 +26,13 @@ on:
 
 jobs:
   test:
-    timeout-minutes: 60
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     env:
       DEV_API_URL: ${{ secrets.DEV_API_URL }}
       DEV_CLIENT: ${{ secrets.DEV_CLIENT }}
       DEV_DB: ${{ secrets.DEV_DB }}
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE20: true
     steps:
       - uses: actions/checkout@v4
 
@@ -43,24 +46,40 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pytest-html
+          # Install pytest-xdist for parallel execution
+          pip install pytest-xdist
 
-      - name: Install Browser
-        if: ${{ github.event.inputs.test_type == 'web' || github.event.inputs.test_type == 'both' }}
-        run: playwright install --with-deps ${{ github.event.inputs.browser }}
+      - name: Install Browsers
+        if: contains('web,both,all browsers,all browsers and api', github.event.inputs.test_type)
+        run: |
+          if [[ "${{ github.event.inputs.test_type }}" == "web" || "${{ github.event.inputs.test_type }}" == "both" ]]; then
+            playwright install --with-deps ${{ github.event.inputs.browser }}
+          else
+            playwright install --with-deps
+          fi
 
       - name: Run API tests
-        if: ${{ github.event.inputs.test_type == 'api' || github.event.inputs.test_type == 'both' }}
+        if: contains('api,both,all browsers and api', github.event.inputs.test_type)
         run: |
           pytest -m apitest
 
       - name: Run Web tests
-        if: ${{ github.event.inputs.test_type == 'web' || github.event.inputs.test_type == 'both' }}
+        if: contains('web,both,all browsers,all browsers and api', github.event.inputs.test_type)
         run: |
-          pytest -m webtest --browser ${{ github.event.inputs.browser }}
+          if [[ "${{ github.event.inputs.test_type }}" == "web" || "${{ github.event.inputs.test_type }}" == "both" ]]; then
+            pytest -m webtest --browser ${{ github.event.inputs.browser }}
+          else
+            pytest -m webtest \
+              --browser chromium \
+              --browser firefox \
+              --browser webkit \
+              -n auto
+          fi
 
-#      - name: Upload Test Results
-#        uses: actions/upload-artifact@v4
-#        if: always()
-#        with:
-#          name: test-results
-#          path: ${{ github.workspace }}/test-results/
+      # Uncomment the following if you want to upload artifacts
+      # - name: Upload Test Results
+      #   uses: actions/upload-artifact@v4
+      #   if: always()
+      #   with:
+      #     name: test-results
+      #     path: ${{ github.workspace }}/test-results/

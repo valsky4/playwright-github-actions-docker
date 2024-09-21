@@ -86,54 +86,54 @@ def test_demo_qa_homepage(env_data, page: Page):
     expect(page).to_have_url(f"{env_data.client}/elements")
     print("Navigated to the Elements page successfully.")
 
-
-@pytest.mark.webtest
-def test_demo_qa_homepage_failure(env_data, page: Page):
-    """
-    Test that navigates to the demoqa homepage and verifies the page title.
-
-    Args:
-        env_data: Fixture that provides environment data, including client_url.
-        page: Playwright Page object provided by pytest-playwright.
-    """
-    # Instantiate the DemoQaHomepage with the page and client URL from env_data
-    homepage = DemoQaHomepage(page)
-    homepage.navigate(env_data.client)
-
-    # Step 2: Verify the page title
-    expected_title = "DEMOQA1"
-    assert page.title() == expected_title, f"Expected title '{expected_title}', got '{page.title()}'"
-
-    # Step 3: Optionally, interact with the page
-    # Example: Click on the "Elements" card
-    homepage.click_elements_card()
-
-    # Verify navigation to the Elements page
-    expect(page).to_have_url(f"{env_data.client}/elements")
-    print("Navigated to the Elements page successfully.")
-
-
-@pytest.mark.webtest
-def test_demo_qa_homepage_failure_two(env_data, page: Page):
-    """
-    Test that navigates to the demoqa homepage and verifies the page title.
-
-    Args:
-        env_data: Fixture that provides environment data, including client_url.
-        page: Playwright Page object provided by pytest-playwright.
-    """
-    # Instantiate the DemoQaHomepage with the page and client URL from env_data
-    homepage = DemoQaHomepage(page)
-    homepage.navigate(env_data.client)
-
-    # Step 2: Verify the page title
-    expected_title = "DEMOQA1"
-    assert page.title() == expected_title, f"Expected title '{expected_title}', got '{page.title()}'"
-
-    # Step 3: Optionally, interact with the page
-    # Example: Click on the "Elements" card
-    homepage.click_elements_card()
-
-    # Verify navigation to the Elements page
-    expect(page).to_have_url(f"{env_data.client}/elements")
-    print("Navigated to the Elements page successfully.")
+#
+# @pytest.mark.webtest
+# def test_demo_qa_homepage_failure(env_data, page: Page):
+#     """
+#     Test that navigates to the demoqa homepage and verifies the page title.
+#
+#     Args:
+#         env_data: Fixture that provides environment data, including client_url.
+#         page: Playwright Page object provided by pytest-playwright.
+#     """
+#     # Instantiate the DemoQaHomepage with the page and client URL from env_data
+#     homepage = DemoQaHomepage(page)
+#     homepage.navigate(env_data.client)
+#
+#     # Step 2: Verify the page title
+#     expected_title = "DEMOQA1"
+#     assert page.title() == expected_title, f"Expected title '{expected_title}', got '{page.title()}'"
+#
+#     # Step 3: Optionally, interact with the page
+#     # Example: Click on the "Elements" card
+#     homepage.click_elements_card()
+#
+#     # Verify navigation to the Elements page
+#     expect(page).to_have_url(f"{env_data.client}/elements")
+#     print("Navigated to the Elements page successfully.")
+#
+#
+# @pytest.mark.webtest
+# def test_demo_qa_homepage_failure_two(env_data, page: Page):
+#     """
+#     Test that navigates to the demoqa homepage and verifies the page title.
+#
+#     Args:
+#         env_data: Fixture that provides environment data, including client_url.
+#         page: Playwright Page object provided by pytest-playwright.
+#     """
+#     # Instantiate the DemoQaHomepage with the page and client URL from env_data
+#     homepage = DemoQaHomepage(page)
+#     homepage.navigate(env_data.client)
+#
+#     # Step 2: Verify the page title
+#     expected_title = "DEMOQA1"
+#     assert page.title() == expected_title, f"Expected title '{expected_title}', got '{page.title()}'"
+#
+#     # Step 3: Optionally, interact with the page
+#     # Example: Click on the "Elements" card
+#     homepage.click_elements_card()
+#
+#     # Verify navigation to the Elements page
+#     expect(page).to_have_url(f"{env_data.client}/elements")
+#     print("Navigated to the Elements page successfully.")
