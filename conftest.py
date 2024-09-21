@@ -11,14 +11,27 @@ from helpers.vpn import is_vpn_connected
 from env_data import EnvData
 
 
+def pytest_addoption(parser):
+    """
+    Adds a custom command-line option to specify the environment.
+    """
+    parser.addoption(
+        "--environment",
+        action="store",
+        default="DEV",
+        help="Environment to run tests against (e.g., DEV, STAGE, PROD). Defaults to DEV.",
+    )
+
+
 @pytest.fixture(scope='session')
-def env_data():
+def env_data(pytestconfig) -> EnvData:
     """
-    Pytest fixture to provide test data from environment variables.
+    Provides an instance of TestData loaded with environment variables
+    based on the specified environment.
     """
+    environment = pytestconfig.getoption("environment").upper()
     try:
-        env_data = EnvData()
-        return env_data
+        return EnvData(desired_env=environment)
     except ValueError as e:
         pytest.exit(str(e))
 
