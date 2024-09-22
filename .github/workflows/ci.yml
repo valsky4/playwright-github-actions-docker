@@ -45,6 +45,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install pytest-html
 
       - name: Install Browsers
         if: contains('web,both,all browsers,all browsers and api', github.event.inputs.test_type)
@@ -55,23 +56,29 @@ jobs:
             playwright install --with-deps
           fi
 
+      - name: Prepare Test Results Directory
+        run: |
+          mkdir -p test-results/traces
+
       - name: Run API tests
         if: contains('api,both,all browsers and api', github.event.inputs.test_type)
         run: |
-          pytest -m apitest
+          mkdir -p test-results
+          pytest -m apitest --html=test-results/api-report.html --self-contained-html
 
       - name: Run Web tests
         if: contains('web,both,all browsers,all browsers and api', github.event.inputs.test_type)
         run: |
-          mkdir -p test-results/traces
           if [[ "${{ github.event.inputs.test_type }}" == "web" || "${{ github.event.inputs.test_type }}" == "both" ]]; then
-            pytest -m webtest --browser ${{ github.event.inputs.browser }} --output=test-results/traces
+            pytest -m webtest --browser ${{ github.event.inputs.browser }} --html=test-results/web-report.html --self-contained-html --output=test-results/traces
           else
             pytest -m webtest \
               --browser chromium \
               --browser firefox \
               --browser webkit \
               -n auto \
+              --html=test-results/web-report.html \
+              --self-contained-html \
               --output=test-results/traces
           fi
 
@@ -81,3 +88,17 @@ jobs:
         with:
           name: playwright-traces
           path: test-results/traces/
+
+      - name: Upload Web Report
+        if: always() && contains('web,both,all browsers,all browsers and api', github.event.inputs.test_type)
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-report
+          path: test-results/web-report.html
+
+      - name: Upload API Report
+        if: always() && contains('api,both,all browsers and api', github.event.inputs.test_type)
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-report
+          path: test-results/api-report.html
