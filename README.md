@@ -84,7 +84,15 @@ Follow the steps below to set up the project in your local environment:
    -> Pushed in the artefacts after the end of the tests.
    ``` 
 
-6. **Notes:**
+6. **Codegen:**
+
+   ```
+   Start codegen with:
+   playwright codegen <url>
+    ```
+
+
+7.**Notes:**
    ```
    DB-related code is commented out because it's only for a local example.
    -> If you want to use it, you'll need to build the container and uncomment the logic related to the DB in the tests and conftest.py.
